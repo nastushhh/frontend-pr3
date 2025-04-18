@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-pink-100 font-sans px-4 sm:px-6 lg:px-8">
+    <header class="py-6">
+        <h1 class="text-3xl font-bold text-center text-pink-700">Магазин украшений</h1>
+    </header>
+    <main class="container mx-auto py-8">
+        <div id="products" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <script>
+        fetch('/products')
+            .then(response => response.json())
+            .then(products => {
+                const productsContainer = document.getElementById('products');
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'bg-white rounded-lg shadow-md p-6 hover:ring-2 hover:ring-pink-400 transition-all duration-300';
+                    productCard.innerHTML = `
+                        <h2 class="text-xl font-semibold text-pink-600 mb-2">${product.name}</h2>
+                        <p class="text-gray-700"><span class="font-medium">Цена:</span> ${product.price} руб.</p>
+                        <p class="text-gray-600 mt-2">${product.description}</p>
+                        <p class="text-gray-500 mt-2"><span class="font-medium">Категория:</span> ${product.categories.join(', ')}</p>
+                    `;
+                    productsContainer.appendChild(productCard);
+                });
+            });
+    </script>
+</body>
+</html>

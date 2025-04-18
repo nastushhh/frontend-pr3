@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ панель</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-pink-100">
+    <div class="container my-5">
+        <h1 class="fs-2 fw-bold text-center">Админ панель</h1>
+
+        <div class="card mb-4">
+            <div class="card-header text-black">Добавить новый товар</div>
+            <div class="card-body">
+                <form id="addProductForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label text-black">Название товара</label>
+                        <input type="text" class="form-control" id="name" placeholder="Введите название товара" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label text-black">Цена</label>
+                        <input type="number" class="form-control" id="price" placeholder="Введите цену" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label text-black">Описание</label>
+                        <input type="text" class="form-control" id="description" placeholder="Введите описание" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categories" class="form-label text-black">Категории</label>
+                        <input type="text" class="form-control" id="categories" placeholder="Украшения, Подвески и тд." required>
+                    </div>
+                    <button type="submit" class="btn btn-pink-600">Добавить товар</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header text-black">Обновить товар</div>
+            <div class="card-body">
+                <form id="updateProductForm">
+                    <div class="mb-3">
+                        <label for="updateId" class="form-label text-black">ID товара</label>
+                        <input type="number" class="form-control" id="updateId" placeholder="Введите ID товара" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="updateName" class="form-label text-black">Название</label>
+                        <input type="text" class="form-control" id="updateName" placeholder="Введите новое название">
+                    </div>
+                    <div class="mb-3">
+                        <label for="updatePrice" class="form-label text-black">Цена</label>
+                        <input type="number" class="form-control" id="updatePrice" placeholder="Введите новую цену">
+                    </div>
+                    <div class="mb-3">
+                        <label for="updateDescription" class="form-label text-black">Описание</label>
+                        <input type="text" class="form-control" id="updateDescription" placeholder="Введите новое описание">
+                    </div>
+                    <div class="mb-3">
+                        <label for="updateCategories" class="form-label text-black">Категории (через запятую)</label>
+                        <input type="text" class="form-control" id="updateCategories" placeholder="например, Украшения, Подвески">
+                    </div>
+                    <button type="submit" class="btn btn-pink-600">Обновить товар</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header text-black">Список товаров</div>
+            <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-3 g-4" id="productList">
+                    <!-- Карточки товаров добавляются динамически-->
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для подтверждения удаления -->
+        <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteConfirmModalLabel">Подтверждение удаления</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Вы уверены, что хотите удалить товар с ID <span id="deleteProductId"></span>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-pink-700" id="confirmDeleteBtn">Удалить</button>
+                    </div>
+                </div}}}}}></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Инициализация модального окна
+        const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        let currentProductId = null;
+
+        // Функция для получения и отображения товаров в виде карточек
+        function fetchAndDisplayProducts() {
+            fetch('http://localhost:8080/products')
+                .then(response => response.json())
+                .then(products => {
+                    const productList = document.getElementById('productList');
+                    productList.innerHTML = ''; // Очищаем содержимое
+                    products.forEach(product => {
+                        const card = document.createElement('div');
+                        card.className = 'col';
+                        card.innerHTML = `
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">${product.name}</h5>
+                                    <p class="card-text"><strong>ID:</strong> ${product.id}</p>
+                                    <p class="card-text"><strong>Цена:</strong> ${product.price}</p>
+                                    <p class="card-text"><strong>Описание:</strong> ${product.description}</p>
+                                    <p class="card-text"><strong>Категории:</strong> ${product.categories.join(', ')}</p>
+                                    <button class="btn btn-pink-700 delete-btn" data-id="${product.id}">Удалить</button>
+                                </div>
+                            </div>
+                        `;
+                        productList.appendChild(card);
+                    });
+
+                    // Добавляем обработчики событий для кнопок удаления
+                    document.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            currentProductId = this.getAttribute('data-id');
+                            document.getElementById('deleteProductId').textContent = currentProductId;
+                            deleteConfirmModal.show();
+                        });
+                    });
+                })
+                .catch(error => console.error('Ошибка при получении товаров:', error));
+        }
+
+        // Обработчик подтверждения удаления в модальном окне
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            fetch(`http://localhost:8080/products/${currentProductId}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Товар удален: ' + JSON.stringify(data));
+                    deleteConfirmModal.hide();
+                    fetchAndDisplayProducts(); // Обновляем список товаров
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка при удалении товара');
+                    deleteConfirmModal.hide();
+                });
+        });
+
+        // Загружаем товары при загрузке страницы
+        document.addEventListener('DOMContentLoaded', fetchAndDisplayProducts);
+
+        // Обработчик для добавления товара
+        document.getElementById('addProductForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const product = {
+                name: document.getElementById('name').value,
+                price: parseFloat(document.getElementById('price').value),
+                description: document.getElementById('description').value,
+                categories: document.getElementById('categories').value.split(',').map(cat => cat.trim())
+            };
+            fetch('http://localhost:8080/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(product)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Товар добавлен: ' + JSON.stringify(product));
+                    fetchAndDisplayProducts(); // Обновляем список товаров
+                    document.getElementById('addProductForm').reset(); // Очищаем форму
+                })
+                .catch(error => console.error('Ошибка:', error));
+        });
+
+        // Обработчик для обновления товара
+        document.getElementById('updateProductForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = document.getElementById('updateId').value;
+            const product = {};
+            if (document.getElementById('updateName').value) product.name = document.getElementById('updateName').value;
+            if (document.getElementById('updatePrice').value) product.price = parseFloat(document.getElementById('updatePrice').value);
+            if (document.getElementById('updateDescription').value) product.description = document.getElementById('updateDescription').value;
+            if (document.getElementById('updateCategories').value) product.categories = document.getElementById('updateCategories').value.split(',').map(cat => cat.trim());
+            fetch(`http://localhost:8080/products/${productId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(product)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Товар обновлен: ' + JSON.stringify(data));
+                    fetchAndDisplayProducts(); // Обновляем список товаров
+                    document.getElementById('updateProductForm').reset(); // Очищаем форму
+                })
+                .catch(error => console.error('Ошибка:', error));
+        });
+    </script>
+
+    <style>
+        .btn-pink-600 {
+            background-color: #db2777;
+            border-color: #db2777;
+            color: white;
+        }
+        .btn-pink-600:hover {
+            background-color: #be185d;
+            border-color: #be185d;
+            color: white;
+        }
+        
+        .btn-pink-700 {
+            background-color: #be185d;
+            border-color: #be185d;
+            color: white;
+        }
+        
+        .btn-pink-700:hover {
+            background-color: #9d174d;
+            border-color: #9d174d;
+            color: white;
+        }
+
+        .bg-pink-100 {
+            background-color: #fce7f3;
+        }
+    </style>
+</body>
+</html>
