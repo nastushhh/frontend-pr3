@@ -4,8 +4,7 @@ info:
   version: 1.0.0
   description: API для управления товарами (CRUD)
 servers:
-  - url: http://localhost:8081
-
+  - url: https://localhost:8081 # Изменено с http на https
 
 paths:
   /api/products:

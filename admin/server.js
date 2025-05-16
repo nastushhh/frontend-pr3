@@ -1,12 +1,19 @@
 const express = require('express');
+const https = require('https'); // Добавляем модуль https
 const fs = require('fs');
 const path = require('path');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 
 const app = express();
-const PORT = 8081;
+const PORT = process.env.PORT || 8081;
 const PRODUCTS_FILE = path.join(__dirname, 'products.json');
+
+// Загрузка сертификатов из папки certs
+const sslOptions = {
+  key: fs.readFileSync(path.join(__dirname, '..', 'certs', 'key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, '..', 'certs', 'cert.pem'))
+};
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yaml'));
 
@@ -43,7 +50,6 @@ const readProducts = (callback) => {
     });
 };
 
-// Helper function to write products
 const writeProducts = (products, callback) => {
     fs.writeFile(PRODUCTS_FILE, JSON.stringify(products, null, 2), 'utf8', (err) => {
         if (err) {
@@ -64,7 +70,6 @@ app.post('/api/products', (req, res) => {
             return res.status(500).json({ error: 'Failed to read products' });
         }
 
-        // If products.json was empty or invalid, start with an empty array
         products = Array.isArray(products) ? products : [];
 
         const generateId = () => {
@@ -144,6 +149,8 @@ app.delete('/api/products/:id', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Admin server is running on http://localhost:${PORT}`);
+// Заменяем app.listen на https.createServer
+https.createServer(sslOptions, app).listen(PORT, () => {
+    console.log(`Admin server is running on https://localhost:${PORT}`);
+    console.log(`Swagger API Docs: https://localhost:${PORT}/api-docs`);
 });

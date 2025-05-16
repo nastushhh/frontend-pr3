@@ -1,11 +1,17 @@
-const http = require('http');
+const https = require('https'); // Заменяем http на https
 const fs = require('fs');
 const path = require('path');
 
 const PORT = 3000;
 const PRODUCTS_FILE = path.join(__dirname, 'products.json');
 
-const server = http.createServer((req, res) => {
+// Загрузка сертификатов из папки certs
+const sslOptions = {
+  key: fs.readFileSync(path.join(__dirname, '..', 'certs', 'key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, '..', 'certs', 'cert.pem'))
+};
+
+const server = https.createServer(sslOptions, (req, res) => { // Заменяем http.createServer на https.createServer
     if (req.url === '/' && req.method === 'GET') {
         fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
             if (err) {
@@ -33,5 +39,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Catalog server is running on http://localhost:${PORT}`);
+    console.log(`Catalog server is running on https://localhost:${PORT}`);
 });

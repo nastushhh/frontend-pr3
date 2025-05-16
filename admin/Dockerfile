@@ -1,18 +1,12 @@
-# Берём минимальный образ nginx
-FROM nginx:alpine
+FROM node:18-alpine
 
-# Копируем наш кастомный конфиг nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Переключаем рабочую директорию на папку со статиκой
-WORKDIR /usr/share/nginx/html
-
-# Очищаем дефолтные файлы nginx
-RUN rm -rf ./*
+COPY package*.json ./
+RUN npm install
 
 COPY . .
-# Открываем порт 80
-EXPOSE 80
 
-# Запускаем nginx как основной процесс
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 8081
+
+CMD ["node", "server.js"]
