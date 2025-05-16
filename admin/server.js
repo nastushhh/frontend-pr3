@@ -5,7 +5,7 @@ const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 
 const app = express();
-const PORT = 8080;
+const PORT = 8081;
 const PRODUCTS_FILE = path.join(__dirname, 'products.json');
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yaml'));
@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.get('/products', (req, res) => {
+app.get('/api/products', (req, res) => {
     fs.readFile(PRODUCTS_FILE, (err, data) => {
         if (err) {
             res.status(500).json({ error: 'Internal Server Error' });
@@ -54,7 +54,7 @@ const writeProducts = (products, callback) => {
     });
 };
 
-app.post('/products', (req, res) => {
+app.post('/api/products', (req, res) => {
     console.log("добавляю");
     const newProducts = req.body;
 
@@ -95,7 +95,7 @@ app.post('/products', (req, res) => {
     });
 });
 
-app.put('/products/:id', (req, res) => {
+app.put('/api/products/:id', (req, res) => {
     const productId = parseInt(req.params.id);
     const updatedProduct = req.body;
     fs.readFile(PRODUCTS_FILE, (err, data) => {
@@ -120,7 +120,7 @@ app.put('/products/:id', (req, res) => {
     });
 });
 
-app.delete('/products/:id', (req, res) => {
+app.delete('/api/products/:id', (req, res) => {
     const productId = parseInt(req.params.id);
     fs.readFile(PRODUCTS_FILE, (err, data) => {
         if (err) {
@@ -145,5 +145,5 @@ app.delete('/products/:id', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Admin server is running on http://localhost:3000`);
+    console.log(`Admin server is running on http://localhost:${PORT}`);
 });

@@ -100,7 +100,7 @@
 
         // Функция для получения и отображения товаров в виде карточек
         function fetchAndDisplayProducts() {
-            fetch('http://localhost:8080/products')
+            fetch('http://localhost:8081/api/products')
                 .then(response => response.json())
                 .then(products => {
                     const productList = document.getElementById('productList');
@@ -137,7 +137,7 @@
 
         // Обработчик подтверждения удаления в модальном окне
         document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-            fetch(`http://localhost:8080/products/${currentProductId}`, {
+            fetch(`http://localhost:8081/api/products/${currentProductId}`, {
                 method: 'DELETE'
             })
                 .then(response => response.json())
@@ -165,7 +165,7 @@
                 description: document.getElementById('description').value,
                 categories: document.getElementById('categories').value.split(',').map(cat => cat.trim())
             };
-            fetch('http://localhost:8080/products', {
+            fetch('http://localhost:8081/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(product)
@@ -188,7 +188,7 @@
             if (document.getElementById('updatePrice').value) product.price = parseFloat(document.getElementById('updatePrice').value);
             if (document.getElementById('updateDescription').value) product.description = document.getElementById('updateDescription').value;
             if (document.getElementById('updateCategories').value) product.categories = document.getElementById('updateCategories').value.split(',').map(cat => cat.trim());
-            fetch(`http://localhost:8080/products/${productId}`, {
+            fetch(`http://localhost:8081/api/products/${productId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(product)

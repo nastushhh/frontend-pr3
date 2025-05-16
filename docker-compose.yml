@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "4000:3000" # Порт для интернет-магазина
+    volumes:
+      - ./admin/products.json:/app/products.json
+    restart: always
+    networks:
+      - app-network
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile.admin # Новый Dockerfile для Node.js
+    ports:
+      - "8081:8081" # Порт для admin/server.js
+    volumes:
+      - ./admin:/app
+      - ./admin/products.json:/app/products.json # Монтируем products.json
+    restart: always
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile # Существующий Dockerfile для Nginx
+    ports:
+      - "80:80" # Nginx на порту 80
+    depends_on:
+      - backend
+      - admin
+    restart: always
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
